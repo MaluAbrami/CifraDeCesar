@@ -18,7 +18,7 @@ namespace src.controllers
 
             group.MapPost("/decifrarForcaBruta", () =>
             {
-                return Results.Created();
+                return Results.Ok();
             });
         }
     }
