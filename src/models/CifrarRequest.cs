@@ -2,7 +2,7 @@ namespace src.models
 {
     public record CifrarRequest
     {
-        public required string TextoClaro { get; set; }
-        public required string Deslocamento { get; set; }
+        public string TextoClaro { get; set; }
+        public int Deslocamento { get; set; }
     }
 }
