@@ -1,7 +1,6 @@
 namespace src.models
 {
-    public record CifrarResponse
+    public record CifrarResponse(string TextoCifrado)
     {
-        public string TextoCifrado { get; set; }
     }
 }
