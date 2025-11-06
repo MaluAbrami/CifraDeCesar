@@ -5,6 +5,8 @@ namespace src.services
     public class CifraService
     {
         private const string Alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private const string AlfabetoMinusculo = "abcdefghijklmnopqrstuvwxyz";
+
 
         public CifrarResponse Cifrar(CifrarRequest request)
         {
@@ -12,12 +14,19 @@ namespace src.services
 
             foreach (var ch in request.TextoClaro)
             {
-                if (Alfabeto.Contains(ch, StringComparison.OrdinalIgnoreCase))
+                if (Alfabeto.Contains(ch))
                 {
                     int index = Alfabeto.IndexOf(ch);
 
                     int proxIndex = (index + request.Deslocamento) % Alfabeto.Length;
                     textoCifrado.Append(Alfabeto[proxIndex]);
+                }
+                else if (AlfabetoMinusculo.Contains(ch))
+                {
+                    int index = AlfabetoMinusculo.IndexOf(ch);
+
+                    int proxIndex = (index + request.Deslocamento) % AlfabetoMinusculo.Length;
+                    textoCifrado.Append(AlfabetoMinusculo[proxIndex]);
                 }
                 else
                 {
