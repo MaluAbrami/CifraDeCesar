@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 
 namespace src.models
 {
-    public record DecifrarResponse
+    public record DecifrarResponse(string TextoClaro)
     {
-        public string TextoClaro { get; set; }
     }
 }
