@@ -1,8 +1,6 @@
 namespace src.models
 {
-    public record DecifrarRequest
+    public record DecifrarRequest(string TextoCifrado, int Deslocamento)
     {
-        public string TextoCifrado { get; set; }
-        public int Deslocamento { get; set; }
     }
 }

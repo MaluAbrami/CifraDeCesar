@@ -5,6 +5,8 @@ namespace src.services
     public class CifraService
     {
         private const string Alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private const string AlfabetoMinusculo = "abcdefghijklmnopqrstuvwxyz";
+
 
         public CifrarResponse Cifrar(CifrarRequest request)
         {
@@ -12,12 +14,19 @@ namespace src.services
 
             foreach (var ch in request.TextoClaro)
             {
-                if (Alfabeto.Contains(ch, StringComparison.OrdinalIgnoreCase))
+                if (Alfabeto.Contains(ch))
                 {
                     int index = Alfabeto.IndexOf(ch);
 
                     int proxIndex = (index + request.Deslocamento) % Alfabeto.Length;
                     textoCifrado.Append(Alfabeto[proxIndex]);
+                }
+                else if (AlfabetoMinusculo.Contains(ch))
+                {
+                    int index = AlfabetoMinusculo.IndexOf(ch);
+
+                    int proxIndex = (index + request.Deslocamento) % AlfabetoMinusculo.Length;
+                    textoCifrado.Append(AlfabetoMinusculo[proxIndex]);
                 }
                 else
                 {
@@ -32,6 +41,22 @@ namespace src.services
         {
             CifrarResponse cifradoInverso = this.Cifrar(new CifrarRequest(request.TextoCifrado, -request.Deslocamento));
             return new DecifrarResponse(cifradoInverso.TextoCifrado);
+        }
+
+        public DecifrarResponse DecifrarForcaBruta(DecifrarForcaBrutaRequest request)
+        {
+            string textoClaro = "";
+
+            bool fimLoop = false;
+            int index = 0;
+            while (!fimLoop || index == 27)
+            {
+                index++;
+                var decifrarResponse = Decifrar(new DecifrarRequest(request.TextoCifrado, index));
+                textoClaro = decifrarResponse.TextoClaro;
+            }
+
+            return new DecifrarResponse(textoClaro);
         }
     }
 }
