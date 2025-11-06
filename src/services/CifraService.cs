@@ -42,5 +42,21 @@ namespace src.services
             CifrarResponse cifradoInverso = this.Cifrar(new CifrarRequest(request.TextoCifrado, -request.Deslocamento));
             return new DecifrarResponse(cifradoInverso.TextoCifrado);
         }
+
+        public DecifrarResponse DecifrarForcaBruta(DecifrarForcaBrutaRequest request)
+        {
+            string textoClaro = "";
+
+            bool fimLoop = false;
+            int index = 0;
+            while (!fimLoop || index == 27)
+            {
+                index++;
+                var decifrarResponse = Decifrar(new DecifrarRequest(request.TextoCifrado, index));
+                textoClaro = decifrarResponse.TextoClaro;
+            }
+
+            return new DecifrarResponse(textoClaro);
+        }
     }
 }
