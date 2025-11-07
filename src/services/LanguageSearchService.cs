@@ -8,12 +8,12 @@ namespace src.services
 {
     public class LanguageSearchService
     {
-        private readonly string _accessKey;
+        private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
-        public LanguageSearchService(string accessKey)
+        public LanguageSearchService(IConfiguration configuration)
         {
-            _accessKey = accessKey ?? throw new ArgumentNullException(nameof(accessKey));
+            _configuration = configuration;
             _httpClient = new HttpClient();
         }
 
@@ -22,7 +22,7 @@ namespace src.services
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Texto não pode ser vazio.", nameof(text));
 
-            string url = $"http://api.languagelayer.com/detect?access_key={_accessKey}&query={Uri.EscapeDataString(text)}";
+            string url = $"http://api.languagelayer.com/detect?access_key={_configuration["languageApiKey"]}&query={Uri.EscapeDataString(text)}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
