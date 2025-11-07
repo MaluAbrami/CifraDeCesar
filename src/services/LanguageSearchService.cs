@@ -1,8 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace src.services
 {
@@ -21,25 +23,33 @@ namespace src.services
 
         public async Task<string> DetectLanguageAsync(string text)
         {
-            _logger.LogInformation($"Iniciando chamada da Api com o texto: {text} e chave {_configuration["languageApiKey"]}");
+            _logger.LogInformation($"Iniciando chamada da API Detect Language com o texto: {text}");
+
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Texto não pode ser vazio.", nameof(text));
 
-            string url = $"http://api.languagelayer.com/detect?access_key={_configuration["languageApiKey"]}&query={Uri.EscapeDataString(text)}";
-            
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
-            _logger.LogInformation($"Retorno da api {response}");
+            string apiKey = _configuration["languageApiKey"]!;
+            string url = "https://ws.detectlanguage.com/v3/detect";
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Headers.Add("Authorization", $"Bearer {apiKey}");
+
+            // Corpo da requisição: application/x-www-form-urlencoded
+            request.Content = new StringContent($"q={Uri.EscapeDataString(text)}", Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             string json = await response.Content.ReadAsStringAsync();
-            using JsonDocument doc = JsonDocument.Parse(json);
 
+            using JsonDocument doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
-            if (root.TryGetProperty("results", out JsonElement results) && results.GetArrayLength() > 0)
+            // Retorno é um array
+            if (root.GetArrayLength() > 0)
             {
-                var first = results[0];
-                return first.GetProperty("language_code").GetString()!;
+                var first = root[0];
+                return first.GetProperty("language").GetString()!;
             }
 
             return null!;
