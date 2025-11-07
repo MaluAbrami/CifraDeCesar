@@ -46,11 +46,11 @@ namespace src.controllers
                 }
             });
 
-            group.MapPost("/decifrarForcaBruta", (CifraService service, DecifrarForcaBrutaRequest request) =>
+            group.MapPost("/decifrarForcaBruta", async (CifraService service, DecifrarForcaBrutaRequest request) =>
             {
                 try
                 {
-                    var result = service.DecifrarForcaBruta(request);
+                    var result = await service.DecifrarForcaBruta(request);
 
                     return Results.Ok(result);
                 }

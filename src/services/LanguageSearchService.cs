@@ -40,6 +40,7 @@ namespace src.services
             response.EnsureSuccessStatusCode();
 
             string json = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation($"Retorno real da api: {json}");
 
             using JsonDocument doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
