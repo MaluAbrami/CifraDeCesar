@@ -34,7 +34,6 @@ namespace src.services
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Add("Authorization", $"Bearer {apiKey}");
 
-            // Corpo da requisição: application/x-www-form-urlencoded
             request.Content = new StringContent($"q={Uri.EscapeDataString(text)}", Encoding.UTF8, "application/x-www-form-urlencoded");
 
             HttpResponseMessage response = await _httpClient.SendAsync(request);
@@ -45,14 +44,23 @@ namespace src.services
             using JsonDocument doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
-            // Retorno é um array
             if (root.GetArrayLength() > 0)
             {
-                var first = root[0];
-                return first.GetProperty("language").GetString()!;
+                // Prioridade para 'pt'
+                foreach (var item in root.EnumerateArray())
+                {
+                    if (item.GetProperty("language").GetString() == "pt")
+                    {
+                        return "pt";
+                    }
+                }
+
+                // Se não tiver 'pt', retorna o primeiro da lista
+                return root[0].GetProperty("language").GetString()!;
             }
 
             return null!;
         }
+
     }
 }
