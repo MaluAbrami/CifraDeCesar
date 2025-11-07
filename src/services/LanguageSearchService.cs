@@ -1,7 +1,10 @@
+using System;
+using System.Linq;
+using System.Net.Http;
 using System.Text;
-using System.Text.Json;
-using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Globalization;
+using System.Threading.Tasks;
 
 public class DicionarioAbertoValidator : IDisposable
 {
@@ -10,6 +13,7 @@ public class DicionarioAbertoValidator : IDisposable
     public DicionarioAbertoValidator(HttpClient? httpClient = null)
     {
         _httpClient = httpClient ?? new HttpClient();
+        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; PalavraChecker/1.0)");
     }
 
     public async Task<bool> FraseExisteEmPortuguesAsync(string frase)
@@ -17,7 +21,7 @@ public class DicionarioAbertoValidator : IDisposable
         if (string.IsNullOrWhiteSpace(frase))
             return false;
 
-        // Quebra em palavras (somente letras)
+        // Extrai apenas palavras (letras, ignora pontuação e números)
         var palavras = Regex.Matches(frase, @"\p{L}+")
                             .Select(m => m.Value)
                             .ToList();
@@ -34,37 +38,17 @@ public class DicionarioAbertoValidator : IDisposable
     private async Task<bool> PalavraExisteAsync(string palavra)
     {
         string normalizada = RemoverAcentos(palavra).ToLowerInvariant();
-        string url = $"https://api.dicionario-aberto.net/near/{Uri.EscapeDataString(palavra)}";
-
-        HttpResponseMessage resposta;
+        string url = $"https://www.dicio.com.br/{Uri.EscapeDataString(normalizada)}/";
 
         try
         {
-            resposta = await _httpClient.GetAsync(url);
-        }
-        catch
-        {
-            return false;
-        }
+            HttpResponseMessage resposta = await _httpClient.GetAsync(url);
 
-        if (!resposta.IsSuccessStatusCode)
-            return false;
-
-        string json = await resposta.Content.ReadAsStringAsync();
-
-        try
-        {
-            var resultados = JsonSerializer.Deserialize<string[]>(json);
-
-            if (resultados is null || resultados.Length == 0)
+            if (resposta.StatusCode == System.Net.HttpStatusCode.NotFound)
                 return false;
 
-            foreach (var palavraRetornada in resultados)
-            {
-                string normalizadaRetornada = RemoverAcentos(palavraRetornada).ToLowerInvariant();
-                if (normalizadaRetornada == normalizada)
-                    return true;
-            }
+            if (resposta.IsSuccessStatusCode)
+                return true;
 
             return false;
         }
