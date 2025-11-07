@@ -8,10 +8,12 @@ namespace src.services
         private const string Alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private const string AlfabetoMinusculo = "abcdefghijklmnopqrstuvwxyz";
         private readonly LanguageSearchService _languageSearchService;
+        private readonly ILogger<CifraService> _logger;
 
-        public CifraService(LanguageSearchService languageSearchService)
+        public CifraService(LanguageSearchService languageSearchService, ILogger<CifraService> logger)
         {
             _languageSearchService = languageSearchService;
+            _logger = logger;
         }
 
         public CifrarResponse Cifrar(CifrarRequest request)
@@ -45,21 +47,23 @@ namespace src.services
             return new DecifrarResponse(cifradoInverso.TextoCifrado);
         }
 
-        public DecifrarResponse DecifrarForcaBruta(DecifrarForcaBrutaRequest request)
+        public async Task<DecifrarResponse> DecifrarForcaBruta(DecifrarForcaBrutaRequest request)
         {
             string textoClaro = "";
 
             bool fimLoop = false;
             int index = 0;
-            while (!fimLoop || index == 27)
+            while (!fimLoop || index == 26)
             {
                 index++;
                 var decifrarResponse = Decifrar(new DecifrarRequest(request.TextoCifrado, index));
+                _logger.LogInformation($"Retorno do decifrar: {decifrarResponse.TextoClaro}");
 
-                var responseApiExternal = _languageSearchService.DetectLanguageAsync(decifrarResponse.TextoClaro);
+                var responseApiExternal = await _languageSearchService.DetectLanguageAsync(decifrarResponse.TextoClaro);
+                _logger.LogInformation($"Retorno da api externa: {responseApiExternal}");
                 if (responseApiExternal != null)
                 {
-                    if (responseApiExternal.Result != "pt")
+                    if (responseApiExternal != "pt")
                         continue;
 
                     textoClaro = decifrarResponse.TextoClaro;
