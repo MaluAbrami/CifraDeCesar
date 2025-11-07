@@ -7,10 +7,10 @@ namespace src.services
     {
         private const string Alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private const string AlfabetoMinusculo = "abcdefghijklmnopqrstuvwxyz";
-        private readonly LanguageSearchService _languageSearchService;
+        private readonly DicionarioAbertoValidator _languageSearchService;
         private readonly ILogger<CifraService> _logger;
 
-        public CifraService(LanguageSearchService languageSearchService, ILogger<CifraService> logger)
+        public CifraService(DicionarioAbertoValidator languageSearchService, ILogger<CifraService> logger)
         {
             _languageSearchService = languageSearchService;
             _logger = logger;
@@ -59,13 +59,10 @@ namespace src.services
                 var decifrarResponse = Decifrar(new DecifrarRequest(request.TextoCifrado, index));
                 _logger.LogInformation($"Retorno do decifrar: {decifrarResponse.TextoClaro}");
 
-                var responseApiExternal = await _languageSearchService.DetectLanguageAsync(decifrarResponse.TextoClaro);
+                var responseApiExternal = await _languageSearchService.FraseExisteEmPortuguesAsync(decifrarResponse.TextoClaro);
                 _logger.LogInformation($"Retorno da api externa: {responseApiExternal}");
-                if (responseApiExternal != null)
+                if (responseApiExternal)
                 {
-                    if (responseApiExternal != "pt")
-                        continue;
-
                     textoClaro = decifrarResponse.TextoClaro;
                     fimLoop = true;
                 }

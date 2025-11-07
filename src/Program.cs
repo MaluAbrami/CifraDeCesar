@@ -7,7 +7,7 @@ builder.Services.AddLogging();
 
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<CifraService>();
-builder.Services.AddScoped<LanguageSearchService>();
+builder.Services.AddScoped<DicionarioAbertoValidator>();
 
 var app = builder.Build();
 
