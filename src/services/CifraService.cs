@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using src.models;
 namespace src.services
@@ -6,7 +7,12 @@ namespace src.services
     {
         private const string Alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private const string AlfabetoMinusculo = "abcdefghijklmnopqrstuvwxyz";
+        private readonly LanguageSearchService _languageSearchService;
 
+        public CifraService(LanguageSearchService languageSearchService)
+        {
+            _languageSearchService = languageSearchService;
+        }
 
         public CifrarResponse Cifrar(CifrarRequest request)
         {
@@ -14,24 +20,20 @@ namespace src.services
 
             foreach (var ch in request.TextoClaro)
             {
-                if (Alfabeto.Contains(ch))
+                var proxChar = ch switch
                 {
-                    int index = Alfabeto.IndexOf(ch);
+                    _ when Alfabeto.Contains(ch) =>
+                        Alfabeto[(Alfabeto.IndexOf(ch) + request.Deslocamento) % Alfabeto.Length],
 
-                    int proxIndex = (index + request.Deslocamento) % Alfabeto.Length;
-                    textoCifrado.Append(Alfabeto[proxIndex]);
-                }
-                else if (AlfabetoMinusculo.Contains(ch))
-                {
-                    int index = AlfabetoMinusculo.IndexOf(ch);
+                    _ when AlfabetoMinusculo.Contains(ch) =>
+                        AlfabetoMinusculo[(AlfabetoMinusculo.IndexOf(ch) + request.Deslocamento) % AlfabetoMinusculo.Length],
 
-                    int proxIndex = (index + request.Deslocamento) % AlfabetoMinusculo.Length;
-                    textoCifrado.Append(AlfabetoMinusculo[proxIndex]);
-                }
-                else
-                {
-                    textoCifrado.Append(ch);
-                }
+                    ' ' => ' ',
+
+                    _ => throw new ValidationException("Caractere inválido encontrado")
+                };
+
+                textoCifrado.Append(proxChar);
             }
 
             return new CifrarResponse(textoCifrado.ToString());
@@ -53,8 +55,20 @@ namespace src.services
             {
                 index++;
                 var decifrarResponse = Decifrar(new DecifrarRequest(request.TextoCifrado, index));
-                textoClaro = decifrarResponse.TextoClaro;
+
+                var responseApiExternal = _languageSearchService.DetectLanguageAsync(decifrarResponse.TextoClaro);
+                if (responseApiExternal != null)
+                {
+                    if (responseApiExternal.Result != "pt")
+                        continue;
+
+                    textoClaro = decifrarResponse.TextoClaro;
+                    fimLoop = true;
+                }
             }
+
+            if (textoClaro == "")
+                throw new Exception("Não foi possível encontrar texto válido");
 
             return new DecifrarResponse(textoClaro);
         }

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using src.models;
 using src.services;
 
@@ -11,21 +12,56 @@ namespace src.controllers
 
             group.MapPost("/cifrar", (CifraService service, CifrarRequest request) =>
             {
-                var result = service.Cifrar(request);
+                try
+                {
+                    var result = service.Cifrar(request);
 
-                return Results.Ok(result);
+                    return Results.Ok(result);
+                }
+                catch (ValidationException ex)
+                {
+                    return Results.BadRequest(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return Results.InternalServerError(ex.Message);
+                }
             });
 
             group.MapPost("/decifrar", (CifraService service, DecifrarRequest request) =>
             {
-                var result = service.Decifrar(request);
+                try
+                {
+                    var result = service.Decifrar(request);
 
-                return Results.Ok(result);
+                    return Results.Ok(result);
+                }
+                catch (ValidationException ex)
+                {
+                    return Results.BadRequest(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return Results.InternalServerError(ex.Message);
+                }
             });
 
-            group.MapPost("/decifrarForcaBruta", () =>
+            group.MapPost("/decifrarForcaBruta", (CifraService service, DecifrarForcaBrutaRequest request) =>
             {
-                return Results.Ok();
+                try
+                {
+                    var result = service.DecifrarForcaBruta(request);
+
+                    return Results.Ok(result);
+                }
+                catch (ValidationException ex)
+                {
+                    return Results.BadRequest(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return Results.InternalServerError(ex.Message);
+                }
             });
         }
     }
