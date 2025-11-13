@@ -25,14 +25,15 @@ public class DicionarioAbertoValidator : IDisposable
         var palavras = Regex.Matches(frase, @"\p{L}+")
                             .Select(m => m.Value)
                             .ToList();
-
+        var quantiaPalavrasCertas = 0;
         foreach (var palavra in palavras)
         {
-            if (!await PalavraExisteAsync(palavra))
-                return false;
+            if (await PalavraExisteAsync(palavra) && palavra.Length > 2){
+                quantiaPalavrasCertas++;
+            }
         }
 
-        return true;
+        return quantiaPalavrasCertas >= 1;
     }
 
     private async Task<bool> PalavraExisteAsync(string palavra)
