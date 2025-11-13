@@ -16,7 +16,7 @@ public class DicionarioAbertoValidator : IDisposable
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; PalavraChecker/1.0)");
     }
 
-    public async Task<bool> FraseExisteEmPortuguesAsync(string frase)
+    public async Task<double> FraseExisteEmPortuguesAsync(string frase)
     {
         if (string.IsNullOrWhiteSpace(frase))
             return false;
@@ -25,7 +25,7 @@ public class DicionarioAbertoValidator : IDisposable
         var palavras = Regex.Matches(frase, @"\p{L}+")
                             .Select(m => m.Value)
                             .ToList();
-        var quantiaPalavrasCertas = 0;
+        var quantiaPalavrasCertas = 0.0;
         foreach (var palavra in palavras)
         {
             if (await PalavraExisteAsync(palavra) && palavra.Length > 2){
@@ -33,7 +33,7 @@ public class DicionarioAbertoValidator : IDisposable
             }
         }
 
-        return quantiaPalavrasCertas >= 1;
+        return quantiaPalavrasCertas / (double)palavras.Count;
     }
 
     private async Task<bool> PalavraExisteAsync(string palavra)
