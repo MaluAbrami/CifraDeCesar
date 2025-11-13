@@ -19,16 +19,17 @@ namespace src.services
         public CifrarResponse Cifrar(CifrarRequest request)
         {
             var textoCifrado = new StringBuilder();
+            int desloc = ((request.Deslocamento % Alfabeto.Length) + Alfabeto.Length) % Alfabeto.Length;
 
             foreach (var ch in request.TextoClaro)
             {
                 var proxChar = ch switch
                 {
                     _ when Alfabeto.Contains(ch) =>
-                        Alfabeto[(Alfabeto.IndexOf(ch) + request.Deslocamento) % Alfabeto.Length],
+                        Alfabeto[(Alfabeto.IndexOf(ch) + desloc) % Alfabeto.Length],
 
                     _ when AlfabetoMinusculo.Contains(ch) =>
-                        AlfabetoMinusculo[(AlfabetoMinusculo.IndexOf(ch) + request.Deslocamento) % AlfabetoMinusculo.Length],
+                        AlfabetoMinusculo[(AlfabetoMinusculo.IndexOf(ch) + desloc) % AlfabetoMinusculo.Length],
 
                     ' ' => ' ',
 
@@ -53,7 +54,7 @@ namespace src.services
 
             bool fimLoop = false;
             int index = 0;
-            while (!fimLoop || index == 26)
+            while (!fimLoop && index < 26)
             {
                 index++;
                 var decifrarResponse = Decifrar(new DecifrarRequest(request.TextoCifrado, index));
@@ -61,6 +62,7 @@ namespace src.services
 
                 var responseApiExternal = await _languageSearchService.FraseExisteEmPortuguesAsync(decifrarResponse.TextoClaro);
                 _logger.LogInformation($"Retorno da api externa: {responseApiExternal}");
+                
                 if (responseApiExternal)
                 {
                     textoClaro = decifrarResponse.TextoClaro;
