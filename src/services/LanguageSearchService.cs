@@ -19,7 +19,7 @@ public class DicionarioAbertoValidator : IDisposable
     public async Task<double> FraseExisteEmPortuguesAsync(string frase)
     {
         if (string.IsNullOrWhiteSpace(frase))
-            return false;
+            return 0;
 
         // Extrai apenas palavras (letras, ignora pontuação e números)
         var palavras = Regex.Matches(frase, @"\p{L}+")

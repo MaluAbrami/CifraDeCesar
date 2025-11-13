@@ -51,7 +51,7 @@ namespace src.services
         public async Task<DecifrarResponse> DecifrarForcaBruta(DecifrarForcaBrutaRequest request)
         {
             string textoClaro = "";
-            var biggestScoreResponse;
+            double biggestScoreResponse = 0;
 
             int index = 0;
             while (index < 26)
@@ -63,7 +63,7 @@ namespace src.services
                 var responseApiExternal = await _languageSearchService.FraseExisteEmPortuguesAsync(decifrarResponse.TextoClaro);
                 _logger.LogInformation($"Retorno da api externa: {responseApiExternal}");
 
-                if(biggestScoreResponse == null || responseApiExternal > biggestScoreResponse)
+                if(biggestScoreResponse == 0 || responseApiExternal > biggestScoreResponse && responseApiExternal > 0.6)
                 {
                     biggestScoreResponse = responseApiExternal;
                     textoClaro = decifrarResponse.TextoClaro;
